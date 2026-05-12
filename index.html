@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>Receiptify LC254 — License Control Panel</title>
 <style>
   :root {
@@ -273,7 +276,7 @@ const CONFIG = {
   // GitHub Personal Access Token (needs repo write access)
   // Generate at: https://github.com/settings/tokens → "Fine-grained" → Contents: Read & Write
   // IMPORTANT: Replace this with your actual token before deploying
-  GITHUB_TOKEN: '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',
+  GITHUB_TOKEN: 'YOUR_GITHUB_PAT_HERE',
 
   // Secret shared with the Receiptify backend for HMAC verification
   SHARED_SECRET: 'RECEIPTIFY_LC254_CLOUD_SECRET_2025',
@@ -319,7 +322,9 @@ if (sessionStorage.getItem('lc254_auth') === '1') {
 // ═══════════════════════════════════════════════════════════════════════════
 // GITHUB API
 // ═══════════════════════════════════════════════════════════════════════════
-const GH_API = `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE}`;
+function ghApiUrl() {
+  return `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE}`;
+}
 
 async function ghFetch(method, body) {
   const opts = {
@@ -331,7 +336,7 @@ async function ghFetch(method, body) {
     },
   };
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
-  const res = await fetch(GH_API + `?ref=${CONFIG.GITHUB_BRANCH}`, opts);
+  const res = await fetch(ghApiUrl() + `?ref=${CONFIG.GITHUB_BRANCH}`, opts);
   return { res, json: await res.json() };
 }
 
@@ -373,7 +378,7 @@ async function saveToGitHub() {
       branch: CONFIG.GITHUB_BRANCH,
     };
     if (fileSha) body.sha = fileSha;
-    const { res, json } = await fetch(GH_API, {
+    const { res, json } = await fetch(ghApiUrl(), {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${CONFIG.GITHUB_TOKEN}`,
